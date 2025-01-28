@@ -1,5 +1,5 @@
-create table requests(
-    request_id serial primary key,
+CREATE TABLE requests(
+    request_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     time TIME NOT NULL,
     date DATE NOT NULL,
@@ -9,3 +9,4 @@ create table requests(
     message VARCHAR(255),
     created_at TIMESTAMP DEFAULT current_timestamp
 );
+

@@ -1,5 +1,6 @@
 const { sendOtp, verifyOtp } = require('../models/auth');
 const db = require('../config/db');
+const pool = require('../config/db');
 
 const handleSendOtp = async (req, res) => {
     const { email } = req.body;
@@ -19,10 +20,10 @@ const handleLogin=async (req,res)=>{
         const isValid = await verifyOtp(email, otp);
         if (isValid) {
             try {
-                const query = 'SELECT * FROM users WHERE email = ?';
-                const [rows] = await db.execute(query, [email]);
-                if (rows.length > 0) {
-                    res.status(200).json({ message: 'OTP verified', user: rows[0]});
+                const query = 'SELECT * FROM users WHERE email = $1';
+                const result = await pool.query(query, [email]);
+                if (result.rows.length > 0) {
+                    res.status(200).json({ message: 'OTP verified', user: result.rows[0] });
                 } else {
                     res.status(404).json({ error: 'Player not found' });
                 }
@@ -45,8 +46,8 @@ const handleRegister = async (req, res) => {
         const isValid = await verifyOtp(email, otp);
         if (isValid) {
             console.log('OTP verified');
-            const query = `INSERT INTO users (email, name) VALUES (?, ?)`;
-            await db.execute(query, [email, name]);
+            const query = `INSERT INTO users (email, name) VALUES ($1, $2)`;
+            await pool.query(query, [email, name]);
             res.status(200).json({ message: 'User registered successfully' });
         } else {
             res.status(402).send('Authentication failed');
