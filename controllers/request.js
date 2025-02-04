@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { use } = require('../routes/requests');
 
 const createRequest=async (req, res)=>{
     const {user_id, time, date, vehicle, from, to, message}=req.body;
@@ -27,6 +28,43 @@ const modifyMyRequest=async (req, res)=>{
     }
     catch(e){
         console.error('Error in modifying request:', e.message);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+}
+
+const deleteMyRequest=async (req, res)=>{
+    const {request_id}=req.body;
+    try{
+        const query=`DELETE FROM requests WHERE request_id=$1`;
+        const query2=`DELETE FROM all_requests WHERE request_id=$1`;
+        const result=await pool.query(query, [request_id]);
+        const result2=await pool.query(query2, [request_id]);
+        if(result.rowCount===0){
+            res.status(404).json({error: 'Request not found'});
+            return;
+        }
+        res.status(200).json({message: 'Request deleted successfully'});
+    }
+    catch(e){
+        console.error('Error in deleting request:', e.message);
+        res.status(500).json({error: 'Internal Server Error'});
+    }
+}
+
+const getMyRequest=async (req, res)=>{
+    const {user_id}=req.params;
+    console.log(user_id);
+    try{
+        const query=`SELECT * FROM requests WHERE user_id=$1`;
+        const result=await pool.query(query, [user_id]);
+        if(result.rowCount===0){
+            res.status(404).json({error: 'No requests found'});
+            return;
+        }
+        res.status(200).json({requests: result.rows[0]});
+    }
+    catch(e){
+        console.error('Error in getting requests:', e.message);
         res.status(500).json({error: 'Internal Server Error'});
     }
 }
@@ -109,8 +147,13 @@ const approveOrDenyRequest = (request_status) => {
 
 const getRequests=async (req,res)=>{
     try{
-        const query=`SELECT * FROM requests`;
+        const query=`
+        SELECT users.name, users.photo_url, requests.user_id, requests.time, requests.date, requests.vehicle, requests.from_place, requests.to_place, requests.message, requests.request_id
+        FROM requests
+        JOIN users ON requests.user_id = users.user_id
+        `;
         const result=await pool.query(query);
+        console.log(result.rows);
         res.status(200).json({requests: result.rows});
     }
     catch(e){
@@ -133,10 +176,24 @@ const getAllSentRequest=async (req, res)=>{
 }
 
 const getMySentRequests=async (req, res)=>{
-    const {sender}=req.body;
+    const {user_id}=req.params;
+    console.log("getMySentRequests");
+    console.log(user_id);
     try{
-        const query=`SELECT * FROM all_requests WHERE sender=$1`;
-        const result=await pool.query(query, [sender]);
+        const query = `
+        SELECT users.name, 
+               all_requests.receiver, 
+               all_requests.request_status, 
+               all_requests.request_id, 
+               requests.time, 
+               requests.date
+        FROM all_requests 
+        JOIN users ON all_requests.receiver = users.user_id 
+        JOIN requests ON requests.request_id = all_requests.request_id 
+        WHERE all_requests.sender = $1
+        `;
+        const result=await pool.query(query, [user_id]);
+        console.log(result.rows);
         if(result.rowCount===0){
             res.status(404).json({error: 'No requests found'});
             return;
@@ -150,10 +207,21 @@ const getMySentRequests=async (req, res)=>{
 }
 
 const getMyReceivedRequests=async (req, res)=>{
-    const {sender}=req.body;
+    const {user_id}=req.params;
+    console.log("getMyReceivedRequests");
     try{
-        const query=`SELECT * FROM all_requests WHERE receiver=$1`;
-        const result=await pool.query(query, [sender]);
+        const query = `
+        SELECT users.name, 
+               all_requests.sender, 
+               all_requests.request_status, 
+               all_requests.request_id
+        FROM all_requests 
+        JOIN users ON all_requests.sender = users.user_id
+        WHERE all_requests.receiver = $1
+        `;
+        // const query=`SELECT * FROM all_requests WHERE receiver=$1`;
+        const result=await pool.query(query, [user_id]);
+        console.log(result.rows);
         if(result.rowCount===0){
             res.status(404).json({error: 'No requests found'});
             return;
@@ -181,4 +249,4 @@ const checkRequestExistence=async (request_id, sender_id, receiver_id)=>{
     }
 }
 
-module.exports = { createRequest, modifyMyRequest, getRequests, sendRequest, getAllSentRequest, cancelRequest, getMySentRequests, getMyReceivedRequests, approveOrDenyRequest};
+module.exports = { createRequest, modifyMyRequest, deleteMyRequest, getMyRequest, getRequests, sendRequest, getAllSentRequest, cancelRequest, getMySentRequests, getMyReceivedRequests, approveOrDenyRequest};

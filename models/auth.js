@@ -11,6 +11,7 @@ function generateOTP() {
 
 
 async function sendOtp(contact) {
+    console.log(contact);
     const otp = generateOTP();
     const email = contact.replace(/\s+/g, '');
     const expiration = Date.now() + otpExpirationTime;
@@ -18,7 +19,7 @@ async function sendOtp(contact) {
     otpStorage[email] = { otp, expiration };
     console.log(otpStorage);
     if (email.includes('@')) {
-        await sendEmail(contact, 'Your OTP Code', `Your OTP code is ${otp} to login to the Inter IIT Sports Meet '24 App.\n\nThis OTP is valid for 5 minutes.\n\nPlease do not share this OTP with anyone.\n\nThank you.\nInter IIT Sports Meet '24 Team`);
+        await sendEmail(contact, 'Your OTP Code', `Your OTP code is ${otp} to login to the TravelDost App.\n\nThis OTP is valid for 5 minutes.\n\nPlease do not share this OTP with anyone.\n\nThank you.`);
     }
 }
 
