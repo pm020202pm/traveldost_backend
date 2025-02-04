@@ -125,7 +125,7 @@ const cancelRequest=async (req,res)=>{
 const approveOrDenyRequest = (request_status) => {
     return async (req, res) => {
         const { request_id, sender_id, receiver_id } =  req.body;
-
+        console.log(request_id, sender_id, receiver_id);
         if (!request_id || !sender_id || !receiver_id) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
@@ -146,13 +146,19 @@ const approveOrDenyRequest = (request_status) => {
 
 
 const getRequests=async (req,res)=>{
+    const {user_id}=req.params;
     try{
         const query=`
-        SELECT users.name, users.photo_url, requests.user_id, requests.time, requests.date, requests.vehicle, requests.from_place, requests.to_place, requests.message, requests.request_id
-        FROM requests
-        JOIN users ON requests.user_id = users.user_id
-        `;
-        const result=await pool.query(query);
+            SELECT 
+                users.name, users.photo_url,
+                COALESCE(all_requests.request_status, 'none') AS request_status, 
+                requests.user_id, requests.time, requests.date, requests.vehicle, requests.from_place, requests.to_place, requests.message, requests.request_id
+            FROM requests
+            JOIN users ON requests.user_id = users.user_id
+            LEFT JOIN all_requests ON requests.request_id = all_requests.request_id AND (all_requests.sender = $1 AND all_requests.receiver = requests.user_id)
+            WHERE requests.user_id != $1;
+            `;
+        const result=await pool.query(query, [user_id]);
         console.log(result.rows);
         res.status(200).json({requests: result.rows});
     }

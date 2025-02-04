@@ -6,7 +6,7 @@ router.post('/createRequest', createRequest);
 router.post('/modifyRequest', modifyMyRequest);
 router.post('/deleteRequest', deleteMyRequest);
 router.get('/getMyRequest/:user_id', getMyRequest);
-router.get('/getRequests', getRequests);
+router.get('/getRequests/:user_id', getRequests);
 router.post('/sendRequest', sendRequest);
 router.get('/getAllSentRequest', getAllSentRequest);
 router.post('/cancelRequest', cancelRequest);
