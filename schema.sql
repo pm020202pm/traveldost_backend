@@ -27,7 +27,9 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     name VARCHAR(100),
     photo_url VARCHAR(255),
-    public_key TEXT NOT NULL
+    public_key TEXT NOT NULL,
+    fcm TEXT,
+    gender VARCHAR(10),
 );
 
 CREATE TABLE chats (

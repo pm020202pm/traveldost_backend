@@ -30,10 +30,7 @@ async function sendOtp(contact) {
 
 async function verifyOtp(contact, otp) {
     const email = contact.replace(/\s+/g, '');
-    const storedOtpData = otpStorage[email];
-    console.log(otpStorage);
-    console.log(`Verifying OTP for contact: ${email}`);
- 
+    const storedOtpData = otpStorage[email]; 
     if (!storedOtpData) {
         console.log(`No OTP found for email: ${storedOtpData}`);
         return false;
