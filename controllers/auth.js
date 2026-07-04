@@ -1,4 +1,5 @@
 const { sendOtp, verifyOtp } = require('../models/auth');
+//
 const pool = require('../config/db');
 const jwt = require('jsonwebtoken')
 require('dotenv').config();
