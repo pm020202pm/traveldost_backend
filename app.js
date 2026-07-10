@@ -84,12 +84,9 @@ io.on('connection', (socket) => {
         const sender_id = msg.sender_id;
         const receiver_id = msg.receiver_id;
         const encrypted_data = msg.encrypted_data;
-        console.log(`Message ${msg}`);
         const encrypted_message = encrypted_data.encrypted_message;
         const iv = encrypted_data.iv;
         const mac = encrypted_data.mac;
-        console.log(`Chat ID: ${chat_id}, Sender ID: ${sender_id}, Receiver ID: ${receiver_id}`);
-        console.log(`Message from ${sender_id} to ${receiver_id}: msg: ${encrypted_message}, iv: ${iv}, mac: ${mac}`);
         try {
             const query = `INSERT INTO messages (chat_id, sender_id, receiver_id, message_text, iv, mac) 
                            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
