@@ -84,6 +84,7 @@ io.on('connection', (socket) => {
         const sender_id = msg.sender_id;
         const receiver_id = msg.receiver_id;
         const encrypted_data = msg.encrypted_data;
+        console.log(`Message ${msg}`);
         const encrypted_message = encrypted_data.encrypted_message;
         const iv = encrypted_data.iv;
         const mac = encrypted_data.mac;
