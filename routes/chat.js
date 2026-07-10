@@ -84,11 +84,10 @@ router.get('/messages/:chatId',authenticateToken, async (req, res) => {
         const offset = (page - 1) * limit;
         // cross join with users table to get the sender's name and photo_url
         const query = `
-            SELECT m.*, u.name AS sender_name, u.photo_url AS sender_photo_url, u.public_key AS sender_public_key_base64
-            FROM messages m
-            JOIN users u ON m.sender_id = u.user_id
-            WHERE m.chat_id = $1
-            ORDER BY m.timestamp DESC
+            SELECT *
+            FROM messages
+            WHERE chat_id = $1
+            ORDER BY timestamp DESC
             LIMIT $2 OFFSET $3
         `;
         const result = await pool.query(query, [chatId, limit, offset]);
