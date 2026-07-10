@@ -95,7 +95,7 @@ io.on('connection', (socket) => {
     
             // Update last message in chats table
             await pool.query(`UPDATE chats SET last_message = $1, iv=$2, mac=$3, updated_at = NOW() WHERE id = $4`, [encrypted_message,iv,mac,chat_id]);
-            io.to(receiver_id).emit('receive_message', result.rows[0]);
+            io.to("5").emit('receive_message', result.rows[0]);
             await sendNotification(fcm,"New Message",`A new message is received.`);
             console.log(`Message sent from ${sender_id} to ${receiver_id}`);
         } catch (error) {
