@@ -80,19 +80,26 @@ io.on('connection', (socket) => {
         console.log(`✅ User ${userId} joined room ${userId}`);
     }
 
-    socket.on('send_message', async ({ chatId, senderId, receiverId, encrypted_message, encryptedAESKey,iv,fcm, senderName, mac}) => {
-        console.log(fcm);
+    socket.on('send_message', async ({ chat_id, fcm, msg}) => {
+        const sender_id = msg.sender_id;
+        const receiver_id = msg.receiver_id;
+        const encrypted_data = msg.encrypted_data;
+        const encrypted_message = encrypted_data.encrypted_message;
+        const iv = encrypted_data.iv;
+        const mac = encrypted_data.mac;
+        
+        console.log(`Message from ${sender_id} to ${receiver_id}: ${encrypted_data}`);
         try {
             const query = `INSERT INTO messages (chat_id, sender_id, receiver_id, message_text, iv, mac) 
                            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`;
-            const values = [chatId, senderId, receiverId, encrypted_message, iv, mac];
+            const values = [chat_id, sender_id, receiver_id, encrypted_message, iv, mac];
             const result = await pool.query(query, values);
     
             // Update last message in chats table
-            await pool.query(`UPDATE chats SET last_message = $1, iv=$2, mac=$3, updated_at = NOW() WHERE id = $4`, [encrypted_message,iv,mac,chatId]);
-            io.to(receiverId).emit('receive_message', result.rows[0]);
-            await sendNotification(fcm,"New Message",`${senderName} sent you a message.`);
-            console.log(`Message sent from ${senderId} to ${receiverId}`);
+            await pool.query(`UPDATE chats SET last_message = $1, iv=$2, mac=$3, updated_at = NOW() WHERE id = $4`, [encrypted_message,iv,mac,chat_id]);
+            io.to(receiver_id).emit('receive_message', result.rows[0]);
+            await sendNotification(fcm,"New Message",`A new message is received.`);
+            console.log(`Message sent from ${sender_id} to ${receiver_id}`);
         } catch (error) {
             console.error("Message sending error:", error);
         }
