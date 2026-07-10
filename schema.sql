@@ -37,7 +37,6 @@ CREATE TABLE chats (
     user1_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     user2_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     last_message TEXT,
-    encrypted_aes_key TEXT NOT NULL,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -47,7 +46,6 @@ CREATE TABLE messages (
     receiver_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     chat_id INT REFERENCES chats(id) ON DELETE CASCADE,
     message_text TEXT NOT NULL,
-    encrypted_aes_key TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status TEXT DEFAULT 'sent'
 );

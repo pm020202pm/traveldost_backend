@@ -17,12 +17,11 @@ router.get('/chats/:userId',authenticateToken, async (req, res) => {
                    u.fcm,
                    c.last_message, 
                    c.updated_at,
-                   c.encrypted_aes_key,
                    c.iv,
                    c.mac
             FROM chats c
             JOIN users u ON (c.user1_id = u.user_id OR c.user2_id = u.user_id)
-            WHERE (c.user1_id = $1 OR c.user2_id = $1) AND u.user_id != $1 AND c.encrypted_aes_key!='null'
+            WHERE (c.user1_id = $1 OR c.user2_id = $1) AND u.user_id != $1
             ORDER BY c.updated_at DESC
         `;
         const result = await pool.query(query, [userId]);
@@ -48,7 +47,6 @@ router.post('/chats',authenticateToken, async (req, res) => {
                    u.public_key,
                    c.last_message, 
                    c.updated_at,
-                   c.encrypted_aes_key,
                    c.iv,
                    c.mac
             FROM chats c
